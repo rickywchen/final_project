@@ -1,0 +1,25 @@
+
+============================================================
+  AFFORDANCE REPORT: cube
+============================================================
+  Object type:    cylinder
+  Dimensions:     6.0 × 6.0 × 10.0 cm
+  CoM:            [0.550, 0.000, 0.470]
+  Table Z:        0.420 m
+
+  Total samples:  481
+  Top-down:       161 feasible
+  Side (antip.):  210 feasible
+  Not feasible:   110
+
+  Top-down quality:  min=0.41  max=0.78  mean=0.58
+  Best top contact:  pos=[0.55 0.   0.52]  q=0.784
+    reach=0.57  fc=1.00  clear=1.00
+
+  Side quality:      min=0.46  max=0.87  mean=0.74
+  Best side contact: pos=[ 0.55  -0.03   0.465]  q=0.874
+    approach_angle=270°  reach=1.00  fc=0.65  clear=0.99
+
+  BEST OVERALL:  side  q=0.874
+    pos=[ 0.55  -0.03   0.465]
+============================================================
