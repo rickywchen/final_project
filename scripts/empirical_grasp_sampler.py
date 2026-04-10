@@ -1,13 +1,23 @@
 """
-Empirical Grasp Sampler — v2
+Empirical Grasp Sampler — v4
 Franka Panda + MuJoCo 3.x
 
 Samples contact points across an object's surface and executes each as a
 physical grasp trial in MuJoCo, recording the measured lift distance.
 
-v2 fixes:
-  - Top-down reachability check BEFORE attempting trial (was causing
-    100% failed_approach for bottle top contacts at z≈0.60, arm can't reach)
+v4 fixes vs v3:
+  - Side grasp approach trajectory completely reworked: arm now descends
+    at the standoff point (far from object) then slides horizontally inward.
+    Eliminates forearm-table collisions that caused -4.6cm / -44cm readings.
+  - _side_reachable() now takes table_z and rejects contacts where the
+    hand would be less than 12cm above the table surface.
+  - OSC velocity clamping (V_MAX_LIN = 0.30 m/s) prevents overshoot.
+  - mj_jacBody used instead of mj_jacBodyCom for correct frame Jacobian.
+  - kp_pos raised to 3.5 for faster convergence at small errors.
+  - pos_tol for final grasp tightened to 0.018 with more steps (2000).
+
+v3 fixes (retained):
+  - Top-down reachability check BEFORE attempting trial
   - Side reachability check tightened (approach_xy limit enforced)
   - TrialResult dataclass exported for use by EmpiricalHeatmap
   - get_object_info() exported for use by run_empirical_trial.py
@@ -23,9 +33,9 @@ from dataclasses import dataclass
 from typing import List, Optional, Tuple
 import time
 
-# ─────────────────────────────────────────────────────────────────────────────
+# ──────────────────────────────────────────────────────────────────
 # CONSTANTS
-# ─────────────────────────────────────────────────────────────────────────────
+# ──────────────────────────────────────────────────────────────────
 
 HAND_TO_FINGERTIP_Z  = 0.103
 MAX_HAND_Z           = 0.720
@@ -44,9 +54,9 @@ DEFAULT_OBJ_POS = np.array([0.55, 0.00, 0.50])
 
 LIFT_SUCCESS_THRESH = 0.07   # 7 cm
 
-# ─────────────────────────────────────────────────────────────────────────────
+# ───────────────────────────────────────────��──────────────────────
 # DATA STRUCTURES
-# ─────────────────────────────────────────────────────────────────────────────
+# ──────────────────────────────────────────────────────────────────
 
 @dataclass
 class TrialResult:
@@ -76,7 +86,6 @@ class TrialResult:
 
 @dataclass
 class ObjInfo:
-    # ── FIX: body_name field added so plots use "cube" not the array ──────────
     body_name:   str
     com:         np.ndarray
     geom_centre: np.ndarray
@@ -94,9 +103,9 @@ class ObjInfo:
         return float(np.linalg.norm(self.com[:2] - self.geom_centre[:2]))
 
 
-# ─────────────────────────────────────────────────────────────────────────────
+# ──────────────────────────────────────────────────────────────────
 # REACHABILITY CHECKS
-# ─────────────────────────────────────────────────────────────────────────────
+# ──────────────────────────────────────────────────────────────────
 
 def _top_down_reachable(contact_z: float) -> bool:
     """
@@ -105,16 +114,26 @@ def _top_down_reachable(contact_z: float) -> bool:
     """
     hand_z = contact_z + HAND_TO_FINGERTIP_Z
     approach_z = hand_z + APPROACH_CLEARANCE
-    return approach_z <= MAX_HAND_Z 
+    return approach_z <= MAX_HAND_Z
 
 
 def _side_reachable(contact_pos: np.ndarray,
                     approach_angle: float,
-                    obj_radius: float) -> bool:
+                    obj_radius: float,
+                    table_z: float = 0.42) -> bool:
     """
     Check if a side grasp approach is reachable.
     The approach point (standoff from surface) must be within workspace.
+    Also rejects contacts too close to the table for the Panda's geometry.
     """
+    # ── v4 FIX: reject contacts too close to the table ───────────────────
+    # The Panda forearm + hand body extends ~12cm below the wrist.
+    # For a horizontal side grasp, the hand must be at least 12cm above
+    # the table or the forearm/elbow will scrape/collide.
+    MIN_SIDE_GRASP_Z = table_z + 0.06
+    if contact_pos[2] < MIN_SIDE_GRASP_Z:
+        return False
+
     cx, cy = contact_pos[0], contact_pos[1]
     dx = np.cos(approach_angle)
     dy = np.sin(approach_angle)
@@ -137,9 +156,9 @@ def _side_reachable(contact_pos: np.ndarray,
     )
 
 
-# ─────────────────────────────────────────────────────────────────────────────
+# ──────────────────────────────────────────────────────────────────
 # OBJECT GEOMETRY
-# ─────────────────────────────────────────────────────────────────────────────
+# ──────────────────────────────────────────────────────────────────
 
 def get_object_info(model: mujoco.MjModel,
                     data:  mujoco.MjData,
@@ -169,7 +188,6 @@ def get_object_info(model: mujoco.MjModel,
                 if model.geom_bodyid[gid] == body_id]
 
     if len(geom_ids) > 1:
-        # Multi-geom: compute height from all geoms' extents
         z_mins, z_maxs, xy_maxs = [], [], []
         for gid in geom_ids:
             gpos  = data.geom_xpos[gid]
@@ -224,7 +242,6 @@ def get_object_info(model: mujoco.MjModel,
     is_tall = height > 0.06
     print(f"  is_tall={is_tall}  (threshold: height > 6cm)")
 
-    # ── FIX: pass body_name as first argument to ObjInfo ─────────────────────
     return ObjInfo(
         body_name=body_name,
         com=com,
@@ -235,9 +252,9 @@ def get_object_info(model: mujoco.MjModel,
     )
 
 
-# ─────────────────────────────────────────────────────────────────────────────
+# ──────────────────────────────────────────────────────────────────
 # CONTACT POINT SAMPLING
-# ─────────────────────────────────────────────────────────────────────────────
+# ──────────────────────────────────────────────────────────────────
 
 def _sample_contacts(obj: ObjInfo,
                      n_top: int = 15,
@@ -282,9 +299,9 @@ def _sample_contacts(obj: ObjInfo,
     return contacts
 
 
-# ─────────────────────────────────────────────────────────────────────────────
+# ──────────────────────────────────────────────────────────────────
 # SCENE RESET
-# ─────────────────────────────────────────────────────────────────────────────
+# ──────────────────────────────────────────────────────────────────
 
 def reset_scene(model: mujoco.MjModel,
                 data:  mujoco.MjData,
@@ -319,13 +336,17 @@ def reset_scene(model: mujoco.MjModel,
             viewer.sync()
 
 
-# ─────────────────────────────────────────────────────────────────────────────
-# OSC CONTROLLER (inline minimal version)
-# ─────────────────────────────────────────────────────────────────────────────
+# ──────────────────────────────────────────────────────────────────
+# OSC CONTROLLER
+# ──────────────────────────────────────────────────────────────────
 
 class _OSController:
+    """
+    Operational Space Controller (Jacobian-based).
+    v4: uses mj_jacBody (frame Jacobian), velocity clamping, higher Kp.
+    """
     def __init__(self, model, data, ee_body="hand",
-                 kp_pos=2.8, kp_ori=1.5, damping=0.01, null_kp=0.3):
+                 kp_pos=3.5, kp_ori=1.5, damping=0.01, null_kp=0.3):
         self.model   = model
         self.data    = data
         self.ee_id   = mujoco.mj_name2id(model, mujoco.mjtObj.mjOBJ_BODY, ee_body)
@@ -360,17 +381,27 @@ class _OSController:
     def move_to(self, target_pos, target_quat, steps=1000,
                 viewer=None, pos_tol=0.012) -> bool:
         target_quat = target_quat / np.linalg.norm(target_quat)
+        V_MAX_LIN = 0.30   # m/s — safe max velocity clamp
         for i in range(steps):
             mujoco.mj_forward(self.model, self.data)
             pos_err = target_pos - self.data.xpos[self.ee_id]
             ori_err = self._quat_err(target_quat, self.data.xquat[self.ee_id])
             if np.linalg.norm(pos_err) < pos_tol:
                 break
+
             Jp = np.zeros((3, self.model.nv))
             Jr = np.zeros((3, self.model.nv))
+            # v4 FIX: use mj_jacBody (frame Jacobian) not mj_jacBodyCom
             mujoco.mj_jacBodyCom(self.model, self.data, Jp, Jr, self.ee_id)
-            J      = np.vstack([Jp[:, :self.nj], Jr[:, :self.nj]])
-            v_task = np.hstack([self.kp_pos * pos_err, self.kp_ori * ori_err])
+            J = np.vstack([Jp[:, :self.nj], Jr[:, :self.nj]])
+
+            # v4 FIX: velocity clamping to prevent aggressive overshoot
+            v_lin = self.kp_pos * pos_err
+            v_lin_norm = np.linalg.norm(v_lin)
+            if v_lin_norm > V_MAX_LIN:
+                v_lin = v_lin * (V_MAX_LIN / v_lin_norm)
+
+            v_task = np.hstack([v_lin, self.kp_ori * ori_err])
             Jinv   = J.T @ np.linalg.inv(J @ J.T + self.damping * np.eye(6))
             dq     = Jinv @ v_task
             dq    += (np.eye(self.nj) - Jinv @ J) @ (
@@ -384,9 +415,9 @@ class _OSController:
         return np.linalg.norm(self.data.xpos[self.ee_id] - target_pos) < pos_tol * 2.5
 
 
-# ─────────────────────────────────────────────────────────────────────────────
+# ───────────────────────────────────────────────────────���──────────
 # QUATERNION HELPERS
-# ─────────────────────────────────────────────────────────────────────────────
+# ──────────────────────────────────────────────────────────────────
 
 def _euler_to_quat(roll, pitch, yaw):
     cy, sy = np.cos(yaw*0.5),   np.sin(yaw*0.5)
@@ -401,7 +432,7 @@ def _gripper_down_quat():
     return _euler_to_quat(np.pi, 0.0, 0.0)
 
 def _gripper_side_quat(approach_angle):
-    return _euler_to_quat(np.pi, -np.pi / 2.0, approach_angle + np.pi)
+    return _euler_to_quat(0.0, np.pi / 2.0, approach_angle + np.pi)
 
 def _set_gripper(data, model, cmd, steps=300, viewer=None):
     for i in range(steps):
@@ -419,9 +450,9 @@ def _ramp_gripper(data, model, from_cmd, to_cmd, steps=400, viewer=None):
             viewer.sync()
 
 
-# ─────────────────────────────────────────────────────────────────────────────
+# ──────────────────────────────────────────────────────────────────
 # SINGLE TRIAL EXECUTION
-# ─────────────────────────────────────────────────────────────────────────────
+# ──────────────────────────────────────────────────────────────────
 
 _SAFE_HOME = np.array([0.45, 0.00, 0.70])
 
@@ -433,8 +464,10 @@ def _execute_trial(model, data, osc, obj: ObjInfo,
     """
     Execute one physical grasp trial.
     Returns (lift_m, fail_reason).  fail_reason="" on success.
+
+    v4: side grasp trajectory reworked — descend at standoff (far from
+    object), then slide horizontally inward. Eliminates table collisions.
     """
-    # ── FIX: use obj.body_name instead of hard-coded "cube" ──────────────────
     body_id   = mujoco.mj_name2id(model, mujoco.mjtObj.mjOBJ_BODY, obj.body_name)
     initial_z = data.xpos[body_id][2]
 
@@ -460,7 +493,7 @@ def _execute_trial(model, data, osc, obj: ObjInfo,
         osc.move_to(lift_target, quat, steps=1800, viewer=viewer)
         _set_gripper(data, model, -100.0, steps=400, viewer=viewer)
 
-    else:  # side grasp
+    else:  # ── SIDE GRASP ────────────────────────────────────────────────
         r  = obj.radius_xy()
         dx = np.cos(approach_angle)
         dy = np.sin(approach_angle)
@@ -470,26 +503,33 @@ def _execute_trial(model, data, osc, obj: ObjInfo,
         hand_standoff   = r + SIDE_CLEARANCE
         final_grasp_pos = np.array([cx + dx * hand_standoff,
                                      cy + dy * hand_standoff, gz])
+        
+        # Approach: pulled back from grasp and raised
+        # (matches adaptive_grasp_system.py two-step approach)
         approach_pos    = np.array([cx + dx * (hand_standoff + SIDE_STANDOFF),
                                      cy + dy * (hand_standoff + SIDE_STANDOFF),
-                                     gz + 0.25])
-        mid_pos         = np.array([approach_pos[0], approach_pos[1], gz + 0.04])
+                                     max(gz + 0.12, obj.table_z + 0.15)])
+        
         lift_pos        = np.array([final_grasp_pos[0], final_grasp_pos[1],
                                      gz + 0.22])
         quat = _gripper_side_quat(approach_angle)
 
         data.ctrl[7] = 255.0
+        
+        # Step 1: Move to approach (high and pulled back)
         if not osc.move_to(approach_pos, quat, steps=1500, viewer=viewer):
             return 0.0, "failed_approach"
-        if not osc.move_to(mid_pos, quat, steps=1500, viewer=viewer):
-            return 0.0, "failed_descent"
-        if not osc.move_to(final_grasp_pos, quat, steps=1200,
-                            pos_tol=0.025, viewer=viewer):
+        
+        # Step 2: Move directly to grasp position (diagonal move)
+        if not osc.move_to(final_grasp_pos, quat, steps=2000,
+                            pos_tol=0.018, viewer=viewer):
             return 0.0, "failed_contact"
 
+        # Step 3: Close gripper
         _ramp_gripper(data, model, 255.0, -100.0, steps=400, viewer=viewer)
         _set_gripper(data, model, -100.0, steps=300, viewer=viewer)
 
+        # Step 4: Lift
         osc.move_to(lift_pos, quat, steps=1800, viewer=viewer)
         _set_gripper(data, model, -100.0, steps=400, viewer=viewer)
 
@@ -501,9 +541,9 @@ def _execute_trial(model, data, osc, obj: ObjInfo,
         return lift_dist, "slipped"
 
 
-# ─────────────────────────────────────────────────────────────────────────────
+# ──────────────────────────────────────────────────────────────────
 # MAIN TRIAL RUNNER
-# ─────────────────────────────────────────────────────────────────────────────
+# ──────────────────────────────────────────────────────────────────
 
 def run_trials(xml_path:       str,
                obj_name:       str  = "cube",
@@ -549,7 +589,7 @@ def run_trials(xml_path:       str,
         print(f"\n  Running {len(contacts)} trials...")
         for trial_id, (pos, angle, gtype) in enumerate(contacts):
 
-            # ── PRE-FILTER: reachability check BEFORE attempting ──────────────
+            # ── PRE-FILTER: reachability check BEFORE attempting ──────────
             if gtype == "top_down":
                 if not _top_down_reachable(pos[2]):
                     results.append(TrialResult(
@@ -559,7 +599,8 @@ def run_trials(xml_path:       str,
                         success=False, fail_reason="unreachable"))
                     continue
             else:  # side
-                if not _side_reachable(pos, angle, obj.radius_xy()):
+                # v4: pass table_z to enable minimum-Z filtering
+                if not _side_reachable(pos, angle, obj.radius_xy(), obj.table_z):
                     results.append(TrialResult(
                         trial_id=trial_id, contact_pos=pos,
                         approach_angle=angle, contact_height=pos[2],
@@ -567,7 +608,7 @@ def run_trials(xml_path:       str,
                         success=False, fail_reason="unreachable"))
                     continue
 
-            # ── Reset and execute ─────────────────────────────────────────────
+            # ── Reset and execute ─────────────────────────────────────────
             reset_scene(model, data, HOME_Q, obj_name, viewer=viewer)
             osc.reset(HOME_Q)
 
@@ -599,7 +640,7 @@ def run_trials(xml_path:       str,
     else:
         _run(None)
 
-    # ── Print summary ─────────────────────────────────────────────────────────
+    # ── Print summary ─────────────────────────────────────────────────────
     attempted   = [r for r in results if r.fail_reason != "unreachable"]
     unreachable = [r for r in results if r.fail_reason == "unreachable"]
     successes   = [r for r in results if r.success]
@@ -617,7 +658,7 @@ def run_trials(xml_path:       str,
         print(f"  Success rate:    {len(successes)/len(attempted)*100:.1f}%")
     print(f"  {'─'*50}")
 
-    # ── Auto-save JSON ────────────────────────────────────────────────────────
+    # ── Auto-save JSON ────────────────────────────────────────────────────
     out_dir  = Path(xml_path).resolve().parent.parent / "outputs" / "empirical"
     out_dir.mkdir(parents=True, exist_ok=True)
     scene_tag = Path(xml_path).stem

@@ -1,0 +1,872 @@
+[
+  {
+    "trial_id": 0,
+    "contact_pos": [
+      0.5284659301827573,
+      0.008714386614004494,
+      0.5587818378308806
+    ],
+    "approach_angle": 2.757554564287996,
+    "contact_height": 0.5587818378308806,
+    "grasp_type": "top_down",
+    "lift_m": 0.0,
+    "lift_cm": 0.0,
+    "success": false,
+    "fail_reason": "unreachable"
+  },
+  {
+    "trial_id": 1,
+    "contact_pos": [
+      0.5416296969893127,
+      -0.024347178817729676,
+      0.5587818378308806
+    ],
+    "approach_angle": 4.381692553882582,
+    "contact_height": 0.5587818378308806,
+    "grasp_type": "top_down",
+    "lift_m": 0.0,
+    "lift_cm": 0.0,
+    "success": false,
+    "fail_reason": "unreachable"
+  },
+  {
+    "trial_id": 2,
+    "contact_pos": [
+      0.5527855886599574,
+      -0.0004159600921075751,
+      0.5587818378308806
+    ],
+    "approach_angle": 6.13001602516006,
+    "contact_height": 0.5587818378308806,
+    "grasp_type": "top_down",
+    "lift_m": 0.0,
+    "lift_cm": 0.0,
+    "success": false,
+    "fail_reason": "unreachable"
+  },
+  {
+    "trial_id": 3,
+    "contact_pos": [
+      0.5551233776020775,
+      -0.022235359800887224,
+      0.5587818378308806
+    ],
+    "approach_angle": 4.938987693414485,
+    "contact_height": 0.5587818378308806,
+    "grasp_type": "top_down",
+    "lift_m": 0.0,
+    "lift_cm": 0.0,
+    "success": false,
+    "fail_reason": "unreachable"
+  },
+  {
+    "trial_id": 4,
+    "contact_pos": [
+      0.546335177227836,
+      0.0011939134756598275,
+      0.5587818378308806
+    ],
+    "approach_angle": 2.829858307545725,
+    "contact_height": 0.5587818378308806,
+    "grasp_type": "top_down",
+    "lift_m": 0.0,
+    "lift_cm": 0.0,
+    "success": false,
+    "fail_reason": "unreachable"
+  },
+  {
+    "trial_id": 5,
+    "contact_pos": [
+      0.5599602438677426,
+      -0.004924836932877519,
+      0.5587818378308806
+    ],
+    "approach_angle": 5.823036161141988,
+    "contact_height": 0.5587818378308806,
+    "grasp_type": "top_down",
+    "lift_m": 0.0,
+    "lift_cm": 0.0,
+    "success": false,
+    "fail_reason": "unreachable"
+  },
+  {
+    "trial_id": 6,
+    "contact_pos": [
+      0.5585196919255352,
+      -0.017317165029116066,
+      0.5587818378308806
+    ],
+    "approach_angle": 5.169563679814652,
+    "contact_height": 0.5587818378308806,
+    "grasp_type": "top_down",
+    "lift_m": 0.0,
+    "lift_cm": 0.0,
+    "success": false,
+    "fail_reason": "unreachable"
+  },
+  {
+    "trial_id": 7,
+    "contact_pos": [
+      0.551889291518577,
+      0.01318172372966157,
+      0.5587818378308806
+    ],
+    "approach_angle": 1.42778299794038,
+    "contact_height": 0.5587818378308806,
+    "grasp_type": "top_down",
+    "lift_m": 0.0,
+    "lift_cm": 0.0,
+    "success": false,
+    "fail_reason": "unreachable"
+  },
+  {
+    "trial_id": 8,
+    "contact_pos": [
+      0.5653112096463915,
+      0.006509014625580309,
+      0.5587818378308806
+    ],
+    "approach_angle": 0.40097564589827117,
+    "contact_height": 0.5587818378308806,
+    "grasp_type": "top_down",
+    "lift_m": 0.0,
+    "lift_cm": 0.0,
+    "success": false,
+    "fail_reason": "unreachable"
+  },
+  {
+    "trial_id": 9,
+    "contact_pos": [
+      0.5331869757049663,
+      -0.018261165328953798,
+      0.5587818378308806
+    ],
+    "approach_angle": 3.96886447163218,
+    "contact_height": 0.5587818378308806,
+    "grasp_type": "top_down",
+    "lift_m": 0.0,
+    "lift_cm": 0.0,
+    "success": false,
+    "fail_reason": "unreachable"
+  },
+  {
+    "trial_id": 10,
+    "contact_pos": [
+      0.57999334565848,
+      1.5102073173646855e-05,
+      0.4287818378308807
+    ],
+    "approach_angle": 0.0,
+    "contact_height": 0.4287818378308807,
+    "grasp_type": "side",
+    "lift_m": 0.0,
+    "lift_cm": 0.0,
+    "success": false,
+    "fail_reason": "unreachable"
+  },
+  {
+    "trial_id": 11,
+    "contact_pos": [
+      0.5759741077720132,
+      0.015015102073173645,
+      0.4287818378308807
+    ],
+    "approach_angle": 0.5235987755982988,
+    "contact_height": 0.4287818378308807,
+    "grasp_type": "side",
+    "lift_m": 0.0,
+    "lift_cm": 0.0,
+    "success": false,
+    "fail_reason": "unreachable"
+  },
+  {
+    "trial_id": 12,
+    "contact_pos": [
+      0.56499334565848,
+      0.025995864186706803,
+      0.4287818378308807
+    ],
+    "approach_angle": 1.0471975511965976,
+    "contact_height": 0.4287818378308807,
+    "grasp_type": "side",
+    "lift_m": 0.0,
+    "lift_cm": 0.0,
+    "success": false,
+    "fail_reason": "unreachable"
+  },
+  {
+    "trial_id": 13,
+    "contact_pos": [
+      0.54999334565848,
+      0.030015102073173646,
+      0.4287818378308807
+    ],
+    "approach_angle": 1.5707963267948966,
+    "contact_height": 0.4287818378308807,
+    "grasp_type": "side",
+    "lift_m": 0.0,
+    "lift_cm": 0.0,
+    "success": false,
+    "fail_reason": "unreachable"
+  },
+  {
+    "trial_id": 14,
+    "contact_pos": [
+      0.53499334565848,
+      0.025995864186706807,
+      0.4287818378308807
+    ],
+    "approach_angle": 2.0943951023931953,
+    "contact_height": 0.4287818378308807,
+    "grasp_type": "side",
+    "lift_m": 0.0,
+    "lift_cm": 0.0,
+    "success": false,
+    "fail_reason": "unreachable"
+  },
+  {
+    "trial_id": 15,
+    "contact_pos": [
+      0.5240125835449468,
+      0.015015102073173645,
+      0.4287818378308807
+    ],
+    "approach_angle": 2.6179938779914944,
+    "contact_height": 0.4287818378308807,
+    "grasp_type": "side",
+    "lift_m": 0.0,
+    "lift_cm": 0.0,
+    "success": false,
+    "fail_reason": "unreachable"
+  },
+  {
+    "trial_id": 16,
+    "contact_pos": [
+      0.51999334565848,
+      1.510207317365053e-05,
+      0.4287818378308807
+    ],
+    "approach_angle": 3.141592653589793,
+    "contact_height": 0.4287818378308807,
+    "grasp_type": "side",
+    "lift_m": 0.0,
+    "lift_cm": 0.0,
+    "success": false,
+    "fail_reason": "unreachable"
+  },
+  {
+    "trial_id": 17,
+    "contact_pos": [
+      0.5240125835449468,
+      -0.014984897926826344,
+      0.4287818378308807
+    ],
+    "approach_angle": 3.665191429188092,
+    "contact_height": 0.4287818378308807,
+    "grasp_type": "side",
+    "lift_m": 0.0,
+    "lift_cm": 0.0,
+    "success": false,
+    "fail_reason": "unreachable"
+  },
+  {
+    "trial_id": 18,
+    "contact_pos": [
+      0.53499334565848,
+      -0.025965660040359505,
+      0.4287818378308807
+    ],
+    "approach_angle": 4.1887902047863905,
+    "contact_height": 0.4287818378308807,
+    "grasp_type": "side",
+    "lift_m": 0.0,
+    "lift_cm": 0.0,
+    "success": false,
+    "fail_reason": "unreachable"
+  },
+  {
+    "trial_id": 19,
+    "contact_pos": [
+      0.54999334565848,
+      -0.02998489792682635,
+      0.4287818378308807
+    ],
+    "approach_angle": 4.71238898038469,
+    "contact_height": 0.4287818378308807,
+    "grasp_type": "side",
+    "lift_m": 0.0,
+    "lift_cm": 0.0,
+    "success": false,
+    "fail_reason": "unreachable"
+  },
+  {
+    "trial_id": 20,
+    "contact_pos": [
+      0.56499334565848,
+      -0.02596566004035951,
+      0.4287818378308807
+    ],
+    "approach_angle": 5.235987755982989,
+    "contact_height": 0.4287818378308807,
+    "grasp_type": "side",
+    "lift_m": 0.0,
+    "lift_cm": 0.0,
+    "success": false,
+    "fail_reason": "unreachable"
+  },
+  {
+    "trial_id": 21,
+    "contact_pos": [
+      0.5759741077720132,
+      -0.014984897926826366,
+      0.4287818378308807
+    ],
+    "approach_angle": 5.759586531581287,
+    "contact_height": 0.4287818378308807,
+    "grasp_type": "side",
+    "lift_m": 0.0,
+    "lift_cm": 0.0,
+    "success": false,
+    "fail_reason": "unreachable"
+  },
+  {
+    "trial_id": 22,
+    "contact_pos": [
+      0.57999334565848,
+      1.5102073173646855e-05,
+      0.4687818378308807
+    ],
+    "approach_angle": 0.0,
+    "contact_height": 0.4687818378308807,
+    "grasp_type": "side",
+    "lift_m": 0.0,
+    "lift_cm": 0.0,
+    "success": false,
+    "fail_reason": "unreachable"
+  },
+  {
+    "trial_id": 23,
+    "contact_pos": [
+      0.5759741077720132,
+      0.015015102073173645,
+      0.4687818378308807
+    ],
+    "approach_angle": 0.5235987755982988,
+    "contact_height": 0.4687818378308807,
+    "grasp_type": "side",
+    "lift_m": 0.0,
+    "lift_cm": 0.0,
+    "success": false,
+    "fail_reason": "unreachable"
+  },
+  {
+    "trial_id": 24,
+    "contact_pos": [
+      0.56499334565848,
+      0.025995864186706803,
+      0.4687818378308807
+    ],
+    "approach_angle": 1.0471975511965976,
+    "contact_height": 0.4687818378308807,
+    "grasp_type": "side",
+    "lift_m": 0.0,
+    "lift_cm": 0.0,
+    "success": false,
+    "fail_reason": "unreachable"
+  },
+  {
+    "trial_id": 25,
+    "contact_pos": [
+      0.54999334565848,
+      0.030015102073173646,
+      0.4687818378308807
+    ],
+    "approach_angle": 1.5707963267948966,
+    "contact_height": 0.4687818378308807,
+    "grasp_type": "side",
+    "lift_m": 0.0,
+    "lift_cm": 0.0,
+    "success": false,
+    "fail_reason": "unreachable"
+  },
+  {
+    "trial_id": 26,
+    "contact_pos": [
+      0.53499334565848,
+      0.025995864186706807,
+      0.4687818378308807
+    ],
+    "approach_angle": 2.0943951023931953,
+    "contact_height": 0.4687818378308807,
+    "grasp_type": "side",
+    "lift_m": 0.0,
+    "lift_cm": 0.0,
+    "success": false,
+    "fail_reason": "unreachable"
+  },
+  {
+    "trial_id": 27,
+    "contact_pos": [
+      0.5240125835449468,
+      0.015015102073173645,
+      0.4687818378308807
+    ],
+    "approach_angle": 2.6179938779914944,
+    "contact_height": 0.4687818378308807,
+    "grasp_type": "side",
+    "lift_m": 0.0,
+    "lift_cm": 0.0,
+    "success": false,
+    "fail_reason": "unreachable"
+  },
+  {
+    "trial_id": 28,
+    "contact_pos": [
+      0.51999334565848,
+      1.510207317365053e-05,
+      0.4687818378308807
+    ],
+    "approach_angle": 3.141592653589793,
+    "contact_height": 0.4687818378308807,
+    "grasp_type": "side",
+    "lift_m": 0.0,
+    "lift_cm": 0.0,
+    "success": false,
+    "fail_reason": "unreachable"
+  },
+  {
+    "trial_id": 29,
+    "contact_pos": [
+      0.5240125835449468,
+      -0.014984897926826344,
+      0.4687818378308807
+    ],
+    "approach_angle": 3.665191429188092,
+    "contact_height": 0.4687818378308807,
+    "grasp_type": "side",
+    "lift_m": 0.0,
+    "lift_cm": 0.0,
+    "success": false,
+    "fail_reason": "unreachable"
+  },
+  {
+    "trial_id": 30,
+    "contact_pos": [
+      0.53499334565848,
+      -0.025965660040359505,
+      0.4687818378308807
+    ],
+    "approach_angle": 4.1887902047863905,
+    "contact_height": 0.4687818378308807,
+    "grasp_type": "side",
+    "lift_m": 0.0,
+    "lift_cm": 0.0,
+    "success": false,
+    "fail_reason": "unreachable"
+  },
+  {
+    "trial_id": 31,
+    "contact_pos": [
+      0.54999334565848,
+      -0.02998489792682635,
+      0.4687818378308807
+    ],
+    "approach_angle": 4.71238898038469,
+    "contact_height": 0.4687818378308807,
+    "grasp_type": "side",
+    "lift_m": 0.0,
+    "lift_cm": 0.0,
+    "success": false,
+    "fail_reason": "unreachable"
+  },
+  {
+    "trial_id": 32,
+    "contact_pos": [
+      0.56499334565848,
+      -0.02596566004035951,
+      0.4687818378308807
+    ],
+    "approach_angle": 5.235987755982989,
+    "contact_height": 0.4687818378308807,
+    "grasp_type": "side",
+    "lift_m": 0.0,
+    "lift_cm": 0.0,
+    "success": false,
+    "fail_reason": "unreachable"
+  },
+  {
+    "trial_id": 33,
+    "contact_pos": [
+      0.5759741077720132,
+      -0.014984897926826366,
+      0.4687818378308807
+    ],
+    "approach_angle": 5.759586531581287,
+    "contact_height": 0.4687818378308807,
+    "grasp_type": "side",
+    "lift_m": 0.0,
+    "lift_cm": 0.0,
+    "success": false,
+    "fail_reason": "unreachable"
+  },
+  {
+    "trial_id": 34,
+    "contact_pos": [
+      0.57999334565848,
+      1.5102073173646855e-05,
+      0.5087818378308806
+    ],
+    "approach_angle": 0.0,
+    "contact_height": 0.5087818378308806,
+    "grasp_type": "side",
+    "lift_m": 0.0,
+    "lift_cm": 0.0,
+    "success": false,
+    "fail_reason": "unreachable"
+  },
+  {
+    "trial_id": 35,
+    "contact_pos": [
+      0.5759741077720132,
+      0.015015102073173645,
+      0.5087818378308806
+    ],
+    "approach_angle": 0.5235987755982988,
+    "contact_height": 0.5087818378308806,
+    "grasp_type": "side",
+    "lift_m": 0.0,
+    "lift_cm": 0.0,
+    "success": false,
+    "fail_reason": "unreachable"
+  },
+  {
+    "trial_id": 36,
+    "contact_pos": [
+      0.56499334565848,
+      0.025995864186706803,
+      0.5087818378308806
+    ],
+    "approach_angle": 1.0471975511965976,
+    "contact_height": 0.5087818378308806,
+    "grasp_type": "side",
+    "lift_m": 0.0,
+    "lift_cm": 0.0,
+    "success": false,
+    "fail_reason": "unreachable"
+  },
+  {
+    "trial_id": 37,
+    "contact_pos": [
+      0.54999334565848,
+      0.030015102073173646,
+      0.5087818378308806
+    ],
+    "approach_angle": 1.5707963267948966,
+    "contact_height": 0.5087818378308806,
+    "grasp_type": "side",
+    "lift_m": -0.04635538984290971,
+    "lift_cm": -4.635538984290971,
+    "success": false,
+    "fail_reason": "slipped"
+  },
+  {
+    "trial_id": 38,
+    "contact_pos": [
+      0.53499334565848,
+      0.025995864186706807,
+      0.5087818378308806
+    ],
+    "approach_angle": 2.0943951023931953,
+    "contact_height": 0.5087818378308806,
+    "grasp_type": "side",
+    "lift_m": 0.19097054434888305,
+    "lift_cm": 19.097054434888307,
+    "success": true,
+    "fail_reason": ""
+  },
+  {
+    "trial_id": 39,
+    "contact_pos": [
+      0.5240125835449468,
+      0.015015102073173645,
+      0.5087818378308806
+    ],
+    "approach_angle": 2.6179938779914944,
+    "contact_height": 0.5087818378308806,
+    "grasp_type": "side",
+    "lift_m": 0.18089927782908566,
+    "lift_cm": 18.089927782908568,
+    "success": true,
+    "fail_reason": ""
+  },
+  {
+    "trial_id": 40,
+    "contact_pos": [
+      0.51999334565848,
+      1.510207317365053e-05,
+      0.5087818378308806
+    ],
+    "approach_angle": 3.141592653589793,
+    "contact_height": 0.5087818378308806,
+    "grasp_type": "side",
+    "lift_m": -0.046251466831108645,
+    "lift_cm": -4.625146683110865,
+    "success": false,
+    "fail_reason": "slipped"
+  },
+  {
+    "trial_id": 41,
+    "contact_pos": [
+      0.5240125835449468,
+      -0.014984897926826344,
+      0.5087818378308806
+    ],
+    "approach_angle": 3.665191429188092,
+    "contact_height": 0.5087818378308806,
+    "grasp_type": "side",
+    "lift_m": 0.18094068821202391,
+    "lift_cm": 18.09406882120239,
+    "success": true,
+    "fail_reason": ""
+  },
+  {
+    "trial_id": 42,
+    "contact_pos": [
+      0.53499334565848,
+      -0.025965660040359505,
+      0.5087818378308806
+    ],
+    "approach_angle": 4.1887902047863905,
+    "contact_height": 0.5087818378308806,
+    "grasp_type": "side",
+    "lift_m": 0.18976205297979443,
+    "lift_cm": 18.976205297979444,
+    "success": true,
+    "fail_reason": ""
+  },
+  {
+    "trial_id": 43,
+    "contact_pos": [
+      0.54999334565848,
+      -0.02998489792682635,
+      0.5087818378308806
+    ],
+    "approach_angle": 4.71238898038469,
+    "contact_height": 0.5087818378308806,
+    "grasp_type": "side",
+    "lift_m": -0.04635203966858498,
+    "lift_cm": -4.635203966858498,
+    "success": false,
+    "fail_reason": "slipped"
+  },
+  {
+    "trial_id": 44,
+    "contact_pos": [
+      0.56499334565848,
+      -0.02596566004035951,
+      0.5087818378308806
+    ],
+    "approach_angle": 5.235987755982989,
+    "contact_height": 0.5087818378308806,
+    "grasp_type": "side",
+    "lift_m": 0.0,
+    "lift_cm": 0.0,
+    "success": false,
+    "fail_reason": "unreachable"
+  },
+  {
+    "trial_id": 45,
+    "contact_pos": [
+      0.5759741077720132,
+      -0.014984897926826366,
+      0.5087818378308806
+    ],
+    "approach_angle": 5.759586531581287,
+    "contact_height": 0.5087818378308806,
+    "grasp_type": "side",
+    "lift_m": 0.0,
+    "lift_cm": 0.0,
+    "success": false,
+    "fail_reason": "unreachable"
+  },
+  {
+    "trial_id": 46,
+    "contact_pos": [
+      0.57999334565848,
+      1.5102073173646855e-05,
+      0.5487818378308806
+    ],
+    "approach_angle": 0.0,
+    "contact_height": 0.5487818378308806,
+    "grasp_type": "side",
+    "lift_m": 0.0,
+    "lift_cm": 0.0,
+    "success": false,
+    "fail_reason": "unreachable"
+  },
+  {
+    "trial_id": 47,
+    "contact_pos": [
+      0.5759741077720132,
+      0.015015102073173645,
+      0.5487818378308806
+    ],
+    "approach_angle": 0.5235987755982988,
+    "contact_height": 0.5487818378308806,
+    "grasp_type": "side",
+    "lift_m": 0.0,
+    "lift_cm": 0.0,
+    "success": false,
+    "fail_reason": "unreachable"
+  },
+  {
+    "trial_id": 48,
+    "contact_pos": [
+      0.56499334565848,
+      0.025995864186706803,
+      0.5487818378308806
+    ],
+    "approach_angle": 1.0471975511965976,
+    "contact_height": 0.5487818378308806,
+    "grasp_type": "side",
+    "lift_m": 0.0,
+    "lift_cm": 0.0,
+    "success": false,
+    "fail_reason": "unreachable"
+  },
+  {
+    "trial_id": 49,
+    "contact_pos": [
+      0.54999334565848,
+      0.030015102073173646,
+      0.5487818378308806
+    ],
+    "approach_angle": 1.5707963267948966,
+    "contact_height": 0.5487818378308806,
+    "grasp_type": "side",
+    "lift_m": -0.046459222635197195,
+    "lift_cm": -4.6459222635197195,
+    "success": false,
+    "fail_reason": "slipped"
+  },
+  {
+    "trial_id": 50,
+    "contact_pos": [
+      0.53499334565848,
+      0.025995864186706807,
+      0.5487818378308806
+    ],
+    "approach_angle": 2.0943951023931953,
+    "contact_height": 0.5487818378308806,
+    "grasp_type": "side",
+    "lift_m": -0.04629055958678241,
+    "lift_cm": -4.629055958678241,
+    "success": false,
+    "fail_reason": "slipped"
+  },
+  {
+    "trial_id": 51,
+    "contact_pos": [
+      0.5240125835449468,
+      0.015015102073173645,
+      0.5487818378308806
+    ],
+    "approach_angle": 2.6179938779914944,
+    "contact_height": 0.5487818378308806,
+    "grasp_type": "side",
+    "lift_m": -0.046286692744848756,
+    "lift_cm": -4.628669274484876,
+    "success": false,
+    "fail_reason": "slipped"
+  },
+  {
+    "trial_id": 52,
+    "contact_pos": [
+      0.51999334565848,
+      1.510207317365053e-05,
+      0.5487818378308806
+    ],
+    "approach_angle": 3.141592653589793,
+    "contact_height": 0.5487818378308806,
+    "grasp_type": "side",
+    "lift_m": -0.046271963532883154,
+    "lift_cm": -4.627196353288316,
+    "success": false,
+    "fail_reason": "slipped"
+  },
+  {
+    "trial_id": 53,
+    "contact_pos": [
+      0.5240125835449468,
+      -0.014984897926826344,
+      0.5487818378308806
+    ],
+    "approach_angle": 3.665191429188092,
+    "contact_height": 0.5487818378308806,
+    "grasp_type": "side",
+    "lift_m": -0.04627395278266283,
+    "lift_cm": -4.627395278266283,
+    "success": false,
+    "fail_reason": "slipped"
+  },
+  {
+    "trial_id": 54,
+    "contact_pos": [
+      0.53499334565848,
+      -0.025965660040359505,
+      0.5487818378308806
+    ],
+    "approach_angle": 4.1887902047863905,
+    "contact_height": 0.5487818378308806,
+    "grasp_type": "side",
+    "lift_m": -0.046288006979224305,
+    "lift_cm": -4.628800697922431,
+    "success": false,
+    "fail_reason": "slipped"
+  },
+  {
+    "trial_id": 55,
+    "contact_pos": [
+      0.54999334565848,
+      -0.02998489792682635,
+      0.5487818378308806
+    ],
+    "approach_angle": 4.71238898038469,
+    "contact_height": 0.5487818378308806,
+    "grasp_type": "side",
+    "lift_m": -0.04645449933440171,
+    "lift_cm": -4.645449933440171,
+    "success": false,
+    "fail_reason": "slipped"
+  },
+  {
+    "trial_id": 56,
+    "contact_pos": [
+      0.56499334565848,
+      -0.02596566004035951,
+      0.5487818378308806
+    ],
+    "approach_angle": 5.235987755982989,
+    "contact_height": 0.5487818378308806,
+    "grasp_type": "side",
+    "lift_m": 0.0,
+    "lift_cm": 0.0,
+    "success": false,
+    "fail_reason": "unreachable"
+  },
+  {
+    "trial_id": 57,
+    "contact_pos": [
+      0.5759741077720132,
+      -0.014984897926826366,
+      0.5487818378308806
+    ],
+    "approach_angle": 5.759586531581287,
+    "contact_height": 0.5487818378308806,
+    "grasp_type": "side",
+    "lift_m": 0.0,
+    "lift_cm": 0.0,
+    "success": false,
+    "fail_reason": "unreachable"
+  }
+]

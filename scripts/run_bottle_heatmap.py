@@ -4,11 +4,11 @@ Standalone script: run the empirical affordance trial loop on the bottle
 scene and immediately generate the heatmap visualisation.
 
 Usage:
-    cd scripts
-    python run_bottle_heatmap.py
+    cd <project root>
+    python scripts/run_bottle_heatmap.py
 
 Outputs → outputs/empirical/
-    trial_outcomes_scene_bottle.json
+    empirical_trials_scene_bottle.json   (also copied from assets/outputs/)
     empirical_2d_bottle.png
     empirical_3d_bottle.png
     empirical_mesh_bottle.png
@@ -17,6 +17,7 @@ Outputs → outputs/empirical/
 
 import sys
 import json
+import shutil
 import numpy as np
 from pathlib import Path
 
@@ -33,7 +34,6 @@ OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
 
 XML_PATH = str(SCENES_DIR / "scene_bottle.xml")
 OBJ_NAME = "cube"   # bottle body is named "cube" in the XML
-OBJ_POS  = [0.55, 0.00, 0.47]   # correct Z: bottom flush with table
 
 # ── Step 1: Run physical trials ───────────────────────────────────────────────
 print("=" * 60)
@@ -46,13 +46,22 @@ print()
 results = run_trials(
     xml_path       = XML_PATH,
     obj_name       = OBJ_NAME,
-    n_top          = 20,          # 20 top-down contact samples
-    n_side_heights = 10,          # 10 height bands on the side
-    n_side_angles  = 24,          # 24 angles = every 15 degrees
-    show_viewer    = True,        # set False to run headless
+    n_top          = 20,
+    n_side_heights = 10,
+    n_side_angles  = 24,
+    show_viewer    = True,
     verbose        = True,
     rng_seed       = 42,
 )
+
+# ── FIX: The sampler saves JSON to assets/outputs/empirical/ (relative to
+# the XML file location). Copy it to outputs/empirical/ so replot_bottle.py
+# and this script agree on the location. ──────────────────────────────────────
+sampler_json = ROOT / "assets" / "outputs" / "empirical" / "empirical_trials_scene_bottle.json"
+local_json   = OUTPUT_DIR / "empirical_trials_scene_bottle.json"
+if sampler_json.exists() and sampler_json != local_json:
+    shutil.copy2(str(sampler_json), str(local_json))
+    print(f"  Trial JSON copied  → {local_json}")
 
 # ── Step 2: Load geometry for heatmap ─────────────────────────────────────────
 import mujoco
@@ -65,16 +74,26 @@ for _ in range(300):
 raw = get_object_info(model, data, OBJ_NAME)
 
 # Convert ObjInfo from sampler to heatmap's ObjInfo
+BOTTLE_SECTIONS = [
+    (0.420, 0.440, 0.030),   # base
+    (0.440, 0.480, 0.030),   # body_lower
+    (0.480, 0.520, 0.030),   # slippery_band
+    (0.520, 0.550, 0.022),   # shoulder
+    (0.550, 0.590, 0.015),   # neck
+    (0.590, 0.600, 0.018),   # cap
+]
+
 obj = HeatmapObjInfo(
-    body_name   = "bottle",
-    com         = raw.com,
-    geom_centre = raw.geom_centre,
-    height      = raw.height,
-    width       = raw.width,
-    depth       = raw.depth,
-    geom_type   = raw.geom_type,
-    table_z     = raw.table_z,
-    top_z       = raw.top_z,
+    body_name       = "bottle",
+    com             = raw.com,
+    geom_centre     = raw.geom_centre,
+    height          = raw.height,
+    width           = raw.width,
+    depth           = raw.depth,
+    geom_type       = raw.geom_type,
+    table_z         = raw.table_z,
+    top_z           = raw.top_z,
+    bottle_sections = BOTTLE_SECTIONS,
 )
 
 # ── Step 3: Build and save empirical heatmap ──────────────────────────────────
@@ -88,9 +107,9 @@ for p in paths:
 print("\n  Done! Open the PNG files in outputs/empirical/ to see the affordance map.")
 print("""
   What to expect in the bottle affordance map:
-    GREEN  (high lift)  → base section (dark blue in XML) — heavy, grippy
-    YELLOW (partial)    → body lower section — normal friction
-    RED    (fail/slip)  → slippery band (orange in XML) — µ=0.15
-    RED    (fail/tip)   → neck/cap — CoM is far below, object tips sideways
-    ASYMMETRY in XY     → real CoM is +Y offset → +Y side grasps succeed more
+    GREEN  (high lift)  → grippy body zone (z=0.52–0.59) — best grasp height
+    YELLOW (partial)    → transition zones — inconsistent
+    RED    (fail/slip)  → slippery band (z=0.48–0.52, µ=0.15) — gripper slides
+    RED    (fail/tip)   → base zone — CoM too low, arm geometry issues
+    ASYMMETRY in XY     → real CoM is +Y offset → some angles succeed more
 """)

@@ -1,7 +1,7 @@
 """
-Quick re-plot — reloads existing trial JSON and regenerates all heatmap images.
-Run this instead of run_bottle_heatmap.py when you only changed empirical_heatmap.py.
-Takes ~10 seconds instead of 15 minutes (no physics trials).
+Quick re-plot: loads existing trial JSON and regenerates heatmap images.
+Run this instead of run_bottle_heatmap.py when you only changed the
+visualisation (empirical_heatmap.py) and don't want to redo 260 trials.
 """
 import sys
 import numpy as np
@@ -17,19 +17,21 @@ ROOT       = Path(__file__).resolve().parent.parent
 SCENES_DIR = ROOT / "assets" / "scenes"
 OUTPUT_DIR = ROOT / "outputs" / "empirical"
 
-# The actual file gets saved to assets/outputs by run_bottle_heatmap.py
-# Check both locations so it works regardless
-JSON_PATHS = [
-    ROOT / "assets" / "outputs" / "empirical" / "empirical_trials_scene_bottle.json",
-    ROOT / "outputs" / "empirical" / "empirical_trials_scene_bottle.json",
-]
-JSON_PATH = next((p for p in JSON_PATHS if p.exists()), None)
+# FIX: JSON is saved by the sampler into assets/outputs/empirical/,
+# but replot reads from outputs/empirical/ — align them to the same place.
+# The sampler saves to: <xml_path parent>/../outputs/empirical/
+# xml_path = assets/scenes/scene_bottle.xml → saves to assets/outputs/empirical/
+# So we must look there:
+JSON_PATH  = ROOT / "assets" / "outputs" / "empirical" / "empirical_trials_scene_bottle.json"
 
-if JSON_PATH is None:
-    print("ERROR: Could not find empirical_trials_scene_bottle.json")
-    print("  Checked:")
-    for p in JSON_PATHS:
-        print(f"    {p}")
+# Fallback: also check the root outputs dir (in case user moved it)
+if not JSON_PATH.exists():
+    JSON_PATH = OUTPUT_DIR / "empirical_trials_scene_bottle.json"
+
+if not JSON_PATH.exists():
+    print(f"ERROR: Trial JSON not found in either:")
+    print(f"  {ROOT / 'assets' / 'outputs' / 'empirical' / 'empirical_trials_scene_bottle.json'}")
+    print(f"  {OUTPUT_DIR / 'empirical_trials_scene_bottle.json'}")
     print("Run run_bottle_heatmap.py first!")
     sys.exit(1)
 
@@ -44,18 +46,19 @@ for _ in range(300):
 
 raw = get_object_info(model, data, "cube")
 
-BOTTLE_SECTIONS = [
-    # (z_world_bottom, z_world_top, radius)
-    (0.420, 0.440, 0.030),   # base
+# Bottle sections from scene_bottle.xml for tapered mesh rendering
+# (z_world_bot, z_world_top, radius)
+bottle_sections = [
+    (0.420, 0.440, 0.030),   # base_section
     (0.440, 0.480, 0.030),   # body_lower
     (0.480, 0.520, 0.030),   # slippery_band
     (0.520, 0.550, 0.022),   # shoulder
     (0.550, 0.590, 0.015),   # neck
-    (0.590, 0.600, 0.018),   # cap
+    (0.590, 0.600, 0.018),   # top_cap
 ]
 
 obj = ObjInfo(
-    body_name       = "bottle",
+    body_name       = "bottle",        # display name in plot titles
     com             = raw.com,
     geom_centre     = raw.geom_centre,
     height          = raw.height,
@@ -64,14 +67,12 @@ obj = ObjInfo(
     geom_type       = raw.geom_type,
     table_z         = raw.table_z,
     top_z           = raw.top_z,
-    bottle_sections = BOTTLE_SECTIONS,
+    bottle_sections = bottle_sections,  # FIX: pass sections for tapered mesh
 )
 
-# Save outputs to the same folder the JSON came from
-out_dir = str(JSON_PATH.parent)
-print(f"Saving plots to: {out_dir}")
+print(f"Loading trial data from: {JSON_PATH}")
 heatmap = EmpiricalHeatmap.from_json(str(JSON_PATH), obj)
-paths   = heatmap.save_all(out_dir, tag="bottle")
+paths   = heatmap.save_all(str(OUTPUT_DIR), tag="bottle")
 
 print(f"\nDone! Regenerated {len(paths)} files:")
 for p in paths:

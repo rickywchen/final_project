@@ -192,20 +192,37 @@ def _nearest_score_with_dist(samps: List[TrialResult],
                               px: float, py: float, pz: float,
                               w_xy: float = 1.0,
                               w_z:  float = 3.0) -> Tuple[float, float]:
+    """Return (score, distance) using inverse-distance-weighted average
+    of nearby samples instead of single nearest neighbour."""
     if not samps:
         return 0.0, float("inf")
-    dists = [
-        w_xy * ((s.contact_pos[0] - px)**2 + (s.contact_pos[1] - py)**2)
-        + w_z  * (s.contact_pos[2] - pz)**2
-        for s in samps
-    ]
-    idx = int(np.argmin(dists))
-    raw_dist = float(np.sqrt(
-        (samps[idx].contact_pos[0] - px)**2 +
-        (samps[idx].contact_pos[1] - py)**2 +
-        (samps[idx].contact_pos[2] - pz)**2
-    ))
-    return _lift_score(samps[idx].lift_m), raw_dist
+
+    scores_dists = []
+    for s in samps:
+        d2 = (w_xy * ((s.contact_pos[0] - px)**2 + (s.contact_pos[1] - py)**2)
+              + w_z * (s.contact_pos[2] - pz)**2)
+        raw = float(np.sqrt(
+            (s.contact_pos[0] - px)**2 +
+            (s.contact_pos[1] - py)**2 +
+            (s.contact_pos[2] - pz)**2))
+        scores_dists.append((_lift_score(s.lift_m), d2, raw))
+
+    # Sort by weighted distance
+    scores_dists.sort(key=lambda x: x[1])
+    closest_raw = scores_dists[0][2]
+
+    # Use up to K nearest neighbours, weighted by 1/d²
+    K = min(5, len(scores_dists))
+    eps = 1e-8
+    w_sum = 0.0
+    s_sum = 0.0
+    for i in range(K):
+        sc, d2, _ = scores_dists[i]
+        w = 1.0 / (d2 + eps)
+        w_sum += w
+        s_sum += w * sc
+
+    return s_sum / w_sum, closest_raw
 
 
 # ─────────────────────────────────────────────────────────────────
