@@ -67,7 +67,7 @@ def _gripper_down_quat():
     return _euler_to_quat(np.pi, 0.0, 0.0)
 
 def _gripper_side_quat(approach_angle):
-    return _euler_to_quat(np.pi, -np.pi / 2.0, approach_angle + np.pi)
+    return _euler_to_quat(0.0, np.pi / 2.0, approach_angle + np.pi)
 
 
 # ─── REACHABILITY CHECK ──────────────────────────────────────────────────────
@@ -201,7 +201,7 @@ def _find_reachable_angles(obj, z: float, n_scan: int = 64) -> List[float]:
 
 class _OSController:
     def __init__(self, model, data, ee_body="hand",
-                 kp_pos=2.8, kp_ori=1.5, damping=0.01, null_kp=0.3):
+                 kp_pos=3.5, kp_ori=1.5, damping=0.01, null_kp=0.3):
         self.model   = model
         self.data    = data
         self.ee_id   = mujoco.mj_name2id(model, mujoco.mjtObj.mjOBJ_BODY, ee_body)
@@ -236,6 +236,7 @@ class _OSController:
     def move_to(self, target_pos, target_quat, steps=1000,
                 viewer=None, pos_tol=0.012) -> bool:
         target_quat = target_quat / np.linalg.norm(target_quat)
+        V_MAX_LIN = 0.30   # m/s — safe max velocity clamp
         for i in range(steps):
             mujoco.mj_forward(self.model, self.data)
             pos_err = target_pos - self.data.xpos[self.ee_id]
@@ -246,7 +247,11 @@ class _OSController:
             Jr = np.zeros((3, self.model.nv))
             mujoco.mj_jacBodyCom(self.model, self.data, Jp, Jr, self.ee_id)
             J      = np.vstack([Jp[:, :self.nj], Jr[:, :self.nj]])
-            v_task = np.hstack([self.kp_pos * pos_err, self.kp_ori * ori_err])
+            v_lin  = self.kp_pos * pos_err
+            v_lin_norm = np.linalg.norm(v_lin)
+            if v_lin_norm > V_MAX_LIN:
+                v_lin = v_lin * (V_MAX_LIN / v_lin_norm)
+            v_task = np.hstack([v_lin, self.kp_ori * ori_err])
             Jinv   = J.T @ np.linalg.inv(J @ J.T + self.damping * np.eye(6))
             dq     = Jinv @ v_task
             dq    += (np.eye(self.nj) - Jinv @ J) @ (
@@ -327,8 +332,9 @@ def _execute_side(model, data, osc, obj, contact_pos, approach_angle,
                                  cy + dy * hand_standoff, gz])
     approach_pos    = np.array([cx + dx * (hand_standoff + SIDE_STANDOFF),
                                  cy + dy * (hand_standoff + SIDE_STANDOFF),
-                                 gz + 0.25])
-    mid_pos         = np.array([approach_pos[0], approach_pos[1], gz + 0.04])
+                                 max(gz + 0.12, obj.table_z + 0.15)])
+                                 # +0.12m above grasp / min 0.15m above table
+                                 # avoids table collision during diagonal descent
     lift_pos        = np.array([final_grasp_pos[0], final_grasp_pos[1],
                                  gz + 0.22])
     quat = _gripper_side_quat(approach_angle)
@@ -339,10 +345,9 @@ def _execute_side(model, data, osc, obj, contact_pos, approach_angle,
     data.ctrl[7] = 255.0
     if not osc.move_to(approach_pos, quat, steps=1500, viewer=viewer):
         return 0.0, "failed_approach"
-    if not osc.move_to(mid_pos, quat, steps=1500, viewer=viewer):
-        return 0.0, "failed_descent"
-    if not osc.move_to(final_grasp_pos, quat, steps=1200,
-                        pos_tol=0.025, viewer=viewer):
+    if not osc.move_to(final_grasp_pos, quat, steps=2000,
+                        pos_tol=0.018, viewer=viewer):
+                        # 2000 steps / tighter tol for single diagonal move
         return 0.0, "failed_contact"
 
     _ramp_gripper(data, model, 255.0, -100.0, steps=400, viewer=viewer)
@@ -408,10 +413,8 @@ def _generate_trials(obj, strategy: str, reachable_angles: List[float],
                 angle = reachable_angles[i % len(reachable_angles)]
 
             # Height: bias toward CoM z (where torque resistance is best)
-            com_z_frac = (obj.com[2] - z_min) / max(z_max - z_min, 0.01)
-            com_z_frac = np.clip(com_z_frac, 0.1, 0.9)
-            z = z_min + (z_max - z_min) * np.clip(
-                com_z_frac + rng.normal(0, 0.15), 0.0, 1.0)
+            # Use CoM Z directly (clamped to safe range) — no random noise
+            z = np.clip(obj.com[2], z_min, z_max)
 
         contact = np.array([cx + r * np.cos(angle),
                             cy + r * np.sin(angle), z])
