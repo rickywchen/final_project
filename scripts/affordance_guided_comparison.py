@@ -342,6 +342,9 @@ def _execute_side(model, data, osc, obj, contact_pos, approach_angle,
     data.ctrl[7] = 255.0
     osc.move_to(SAFE_HOME, _gripper_down_quat(), steps=800, viewer=viewer)
 
+    old_kp = osc.kp_pos
+    osc.kp_pos = 2.0
+
     data.ctrl[7] = 255.0
     if not osc.move_to(approach_pos, quat, steps=1500, viewer=viewer):
         return 0.0, "failed_approach"
@@ -731,7 +734,7 @@ def _plot_comparison(results: dict, obj: ObjectInfo, reachable: List[float]):
 def main():
     scenes = [
         # (scene_file,                obj_name, obj_pos_z, n_trials)
-        ("scene_shifted_com.xml",     "cube",   0.50,      8),
+        ("scene_shifted_com.xml",     "cube",   0.47,      8),
         ("scene_grasp_cylinder.xml",  "cube",   0.47,      8),
     ]
 
