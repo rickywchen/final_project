@@ -250,7 +250,7 @@ def gripper_down_quat():
     return euler_to_quat(np.pi, 0.0, 0.0)
 
 def gripper_side_quat(approach_angle, roll=0.0):
-    return euler_to_quat(np.pi + roll, -np.pi / 2.0, approach_angle + np.pi)
+    return euler_to_quat(roll, np.pi / 2.0, approach_angle + np.pi)
 
 
 # ─────────────────────────────────────────────────────────────────
@@ -343,8 +343,7 @@ def plan_side_from_contact(obj:            ObjectGeometry,
                              contact_pos[2]])
     approach    = np.array([contact_pos[0] + dx * (standoff + 0.18),
                              contact_pos[1] + dy * (standoff + 0.18),
-                             contact_pos[2] + 0.25])
-    mid_descent = np.array([approach[0], approach[1], contact_pos[2] + 0.04])
+                             max(contact_pos[2] + 0.12, obj.table_z + 0.15)])
     lift        = np.array([final_grasp[0], final_grasp[1], contact_pos[2] + 0.22])
 
     return GraspCandidate(
@@ -352,7 +351,7 @@ def plan_side_from_contact(obj:            ObjectGeometry,
         contact_pos=contact_pos, approach_angle=approach_angle,
         grasp_type="side",
         safe_home=safe_home.copy(),
-        approach_pos=approach, grasp_pos=mid_descent,
+        approach_pos=approach, grasp_pos=final_grasp,
         final_grasp_pos=final_grasp, lift_pos=lift,
         orientation=gripper_side_quat(approach_angle),
         approach_steps=1500, grasp_steps=1500,
@@ -537,7 +536,7 @@ def _print_candidates(candidates: List[GraspCandidate], mode: str):
 
 class OSController:
     def __init__(self, model, data, ee_body="hand",
-                 kp_pos=2.8, kp_ori=1.5, damping=0.01, null_kp=0.3):
+                 kp_pos=3.5, kp_ori=1.5, damping=0.01, null_kp=0.3):
         self.model     = model
         self.data      = data
         self.ee_id     = mujoco.mj_name2id(model, mujoco.mjtObj.mjOBJ_BODY, ee_body)
@@ -573,6 +572,7 @@ class OSController:
     def move_to(self, target_pos, target_quat, steps=1000,
                 viewer=None, pos_tol=0.012) -> bool:
         target_quat = target_quat / np.linalg.norm(target_quat)
+        V_MAX_LIN = 0.30   # m/s — safe max velocity clamp
         for i in range(steps):
             mujoco.mj_forward(self.model, self.data)
             pos_err = target_pos - self.data.xpos[self.ee_id]
@@ -583,7 +583,11 @@ class OSController:
             Jr = np.zeros((3, self.model.nv))
             mujoco.mj_jacBodyCom(self.model, self.data, Jp, Jr, self.ee_id)
             J      = np.vstack([Jp[:, :self.nj], Jr[:, :self.nj]])
-            v_task = np.hstack([self.kp_pos * pos_err, self.kp_ori * ori_err])
+            v_lin  = self.kp_pos * pos_err
+            v_lin_norm = np.linalg.norm(v_lin)
+            if v_lin_norm > V_MAX_LIN:
+                v_lin = v_lin * (V_MAX_LIN / v_lin_norm)
+            v_task = np.hstack([v_lin, self.kp_ori * ori_err])
             Jinv   = J.T @ np.linalg.inv(J @ J.T + self.damping * np.eye(6))
             dq     = Jinv @ v_task
             # Null-space: drift toward home posture
@@ -648,30 +652,31 @@ def execute_grasp(model, data, osc: OSController,
     data.ctrl[7] = grasp.gripper_open
     osc.move_to(SAFE_HOME, gripper_down_quat(), steps=800, viewer=viewer)
 
+    # Save kp_pos and lower it for gentle approach
+    old_kp = osc.kp_pos
+    osc.kp_pos = 2.0
+
     if verbose:
         print("        → Stage 1: approach...")
     data.ctrl[7] = grasp.gripper_open
     if not osc.move_to(grasp.approach_pos, grasp.orientation,
                        steps=grasp.approach_steps, viewer=viewer):
+        osc.kp_pos = old_kp
         return False, 0.0, "failed_approach"
 
     if verbose:
         print("        → Stage 2: descend...")
     if grasp.grasp_type == "side":
-        # Side grasp: descend to mid-height first, then move inward
-        if not osc.move_to(grasp.grasp_pos, grasp.orientation,
-                           steps=grasp.grasp_steps, viewer=viewer):
-            return False, 0.0, "failed_descent"
-        if verbose:
-            print("        → Stage 3: inward...")
+        # Side grasp: single diagonal move from approach to final grasp
         if not osc.move_to(grasp.final_grasp_pos, grasp.orientation,
-                           steps=grasp.final_steps,
-                           pos_tol=grasp.final_tol, viewer=viewer):
-            return False, 0.0, "failed_final_pose"
+                           steps=2000, pos_tol=0.018, viewer=viewer):
+            osc.kp_pos = old_kp
+            return False, 0.0, "failed_contact"
     else:
         # Top-down: descend directly to grasp position
         if not osc.move_to(grasp.final_grasp_pos, grasp.orientation,
                            steps=grasp.grasp_steps, viewer=viewer):
+            osc.kp_pos = old_kp
             return False, 0.0, "failed_descent"
 
     if verbose:
@@ -679,6 +684,9 @@ def execute_grasp(model, data, osc: OSController,
     ramp_gripper(data, model, grasp.gripper_open, grasp.gripper_close,
                  steps=400, viewer=viewer)
     set_gripper(data, model, grasp.gripper_close, steps=300, viewer=viewer)
+
+    # Restore kp_pos for fast lift
+    osc.kp_pos = old_kp
 
     if verbose:
         print("        → Lifting...")
@@ -1039,7 +1047,7 @@ def main():
         run_shifted_com_comparison(
             xml_path   = str(shifted_xml),
             obj_name   = "cube",
-            obj_pos    = np.array([0.55, 0.00, 0.50]),
+            obj_pos    = np.array([0.55, 0.00, 0.47]),
             output_dir = str(OUTPUT_DIR / "heatmaps"),
         )
     else:
