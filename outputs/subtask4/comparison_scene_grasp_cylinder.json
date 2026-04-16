@@ -58,8 +58,8 @@
   ],
   "naive_success_rate": 0.5,
   "map_success_rate": 0.875,
-  "naive_avg_lift_cm": 5.961876649124756,
-  "map_avg_lift_cm": 21.931574207110547,
+  "naive_avg_lift_cm": 11.32545708647352,
+  "map_avg_lift_cm": 21.575034112515297,
   "naive_trials": [
     {
       "trial": 0,
@@ -74,7 +74,7 @@
       "approach_angle_deg": 78.75,
       "grasp_z": 0.46969189818821905,
       "success": true,
-      "lift_cm": 25.450675966002805,
+      "lift_cm": 25.20330994839562,
       "fail_reason": ""
     },
     {
@@ -82,7 +82,7 @@
       "approach_angle_deg": 84.375,
       "grasp_z": 0.509691898188219,
       "success": false,
-      "lift_cm": -2.027126270129437,
+      "lift_cm": -2.023698241599925,
       "fail_reason": "slipped"
     },
     {
@@ -90,15 +90,15 @@
       "approach_angle_deg": 90.0,
       "grasp_z": 0.42969189818821907,
       "success": false,
-      "lift_cm": -44.02314756215723,
-      "fail_reason": "slipped"
+      "lift_cm": 0.0,
+      "fail_reason": "failed_contact"
     },
     {
       "trial": 4,
       "approach_angle_deg": 95.625,
       "grasp_z": 0.46969189818821905,
       "success": true,
-      "lift_cm": 25.672827421485906,
+      "lift_cm": 25.42349231726217,
       "fail_reason": ""
     },
     {
@@ -106,7 +106,7 @@
       "approach_angle_deg": 101.25,
       "grasp_z": 0.509691898188219,
       "success": true,
-      "lift_cm": 19.81311850900644,
+      "lift_cm": 19.61785125861015,
       "fail_reason": ""
     },
     {
@@ -122,7 +122,7 @@
       "approach_angle_deg": 112.5,
       "grasp_z": 0.46969189818821905,
       "success": true,
-      "lift_cm": 22.808665128789556,
+      "lift_cm": 22.38270140912015,
       "fail_reason": ""
     }
   ],
@@ -140,7 +140,7 @@
       "approach_angle_deg": 78.75,
       "grasp_z": 0.4696918981882191,
       "success": true,
-      "lift_cm": 25.450591705495878,
+      "lift_cm": 25.20329044471404,
       "fail_reason": ""
     },
     {
@@ -148,7 +148,7 @@
       "approach_angle_deg": 84.375,
       "grasp_z": 0.4696918981882191,
       "success": true,
-      "lift_cm": 25.754642486189766,
+      "lift_cm": 25.25365257880094,
       "fail_reason": ""
     },
     {
@@ -156,7 +156,7 @@
       "approach_angle_deg": 90.0,
       "grasp_z": 0.4696918981882191,
       "success": true,
-      "lift_cm": 26.12425456492006,
+      "lift_cm": 25.47668783815787,
       "fail_reason": ""
     },
     {
@@ -164,7 +164,7 @@
       "approach_angle_deg": 95.625,
       "grasp_z": 0.4696918981882191,
       "success": true,
-      "lift_cm": 25.67264628749933,
+      "lift_cm": 25.423578523086903,
       "fail_reason": ""
     },
     {
@@ -172,7 +172,7 @@
       "approach_angle_deg": 101.25,
       "grasp_z": 0.4696918981882191,
       "success": true,
-      "lift_cm": 25.295064069301848,
+      "lift_cm": 24.804495323675418,
       "fail_reason": ""
     },
     {
@@ -180,7 +180,7 @@
       "approach_angle_deg": 106.875,
       "grasp_z": 0.4696918981882191,
       "success": true,
-      "lift_cm": 24.34673798429163,
+      "lift_cm": 24.05547186923184,
       "fail_reason": ""
     },
     {
@@ -188,7 +188,7 @@
       "approach_angle_deg": 112.5,
       "grasp_z": 0.4696918981882191,
       "success": true,
-      "lift_cm": 22.808656559185852,
+      "lift_cm": 22.38309632245536,
       "fail_reason": ""
     }
   ]
