@@ -391,7 +391,6 @@ class _OSController:
 
             Jp = np.zeros((3, self.model.nv))
             Jr = np.zeros((3, self.model.nv))
-            # v4 FIX: use mj_jacBody (frame Jacobian) not mj_jacBodyCom
             mujoco.mj_jacBodyCom(self.model, self.data, Jp, Jr, self.ee_id)
             J = np.vstack([Jp[:, :self.nj], Jr[:, :self.nj]])
 
@@ -659,7 +658,8 @@ def run_trials(xml_path:       str,
     print(f"  {'─'*50}")
 
     # ── Auto-save JSON ────────────────────────────────────────────────────
-    out_dir  = Path(xml_path).resolve().parent.parent / "outputs" / "empirical"
+    PROJECT_ROOT = Path(__file__).resolve().parent.parent
+    out_dir  = PROJECT_ROOT / "outputs" / "empirical"
     out_dir.mkdir(parents=True, exist_ok=True)
     scene_tag = Path(xml_path).stem
     json_path = out_dir / f"empirical_trials_{scene_tag}.json"
