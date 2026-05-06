@@ -8,7 +8,7 @@ Usage:
     python scripts/run_bottle_heatmap.py
 
 Outputs → outputs/empirical/
-    empirical_trials_scene_bottle.json   (also copied from assets/outputs/)
+    empirical_trials_scene_bottle.json
     empirical_2d_bottle.png
     empirical_3d_bottle.png
     empirical_mesh_bottle.png
@@ -17,7 +17,6 @@ Outputs → outputs/empirical/
 
 import sys
 import json
-import shutil
 import numpy as np
 from pathlib import Path
 
@@ -53,15 +52,6 @@ results = run_trials(
     verbose        = True,
     rng_seed       = 42,
 )
-
-# ── FIX: The sampler saves JSON to assets/outputs/empirical/ (relative to
-# the XML file location). Copy it to outputs/empirical/ so replot_bottle.py
-# and this script agree on the location. ──────────────────────────────────────
-sampler_json = ROOT / "assets" / "outputs" / "empirical" / "empirical_trials_scene_bottle.json"
-local_json   = OUTPUT_DIR / "empirical_trials_scene_bottle.json"
-if sampler_json.exists() and sampler_json != local_json:
-    shutil.copy2(str(sampler_json), str(local_json))
-    print(f"  Trial JSON copied  → {local_json}")
 
 # ── Step 2: Load geometry for heatmap ─────────────────────────────────────────
 import mujoco
