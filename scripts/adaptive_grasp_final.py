@@ -572,7 +572,7 @@ class OSController:
     def move_to(self, target_pos, target_quat, steps=1000,
                 viewer=None, pos_tol=0.012) -> bool:
         target_quat = target_quat / np.linalg.norm(target_quat)
-        V_MAX_LIN = 0.30   # m/s — safe max velocity clamp
+        V_MAX_LIN = 0.15   # m/s — safe max velocity clamp
         for i in range(steps):
             mujoco.mj_forward(self.model, self.data)
             pos_err = target_pos - self.data.xpos[self.ee_id]
