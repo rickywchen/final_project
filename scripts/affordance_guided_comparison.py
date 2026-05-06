@@ -736,6 +736,9 @@ def main():
         # (scene_file,                obj_name, obj_pos_z, n_trials)
         ("scene_shifted_com.xml",     "cube",   0.47,      8),
         ("scene_grasp_cylinder.xml",  "cube",   0.47,      8),
+        ("scene_grasp_clean.xml",     "cube",   0.47,      8),
+        ("scene_grasp_tallbox.xml",   "cube",   0.47,      8),
+        ("scene_bottle.xml",          "cube",   0.47,      8),
     ]
 
     for scene_file, obj_name, z, n in scenes:
@@ -756,3 +759,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+

@@ -118,50 +118,61 @@ def _get_object_geometry(model: mujoco.MjModel,
     if body_id < 0:
         raise ValueError(f"Body '{body_name}' not found.")
 
-    # Real physics CoM
+    # Real physics CoM (already aggregated over the body subtree)
     com = data.subtree_com[body_id].copy()
 
-    geom_id = -1
-    for cname in [f"{body_name}_geom", body_name]:
-        gid = mujoco.mj_name2id(model, mujoco.mjtObj.mjOBJ_GEOM, cname)
-        if gid >= 0 and model.geom_bodyid[gid] == body_id:
-            geom_id = gid
-            break
-    if geom_id < 0:
-        for gid in range(model.ngeom):
-            if model.geom_bodyid[gid] == body_id:
-                geom_id = gid
-                break
-    if geom_id < 0:
+    # Collect every geom that belongs to this body
+    geom_ids = [gid for gid in range(model.ngeom)
+                if model.geom_bodyid[gid] == body_id]
+    if not geom_ids:
         raise ValueError(f"No geom for '{body_name}'.")
 
-    # Geometric centre from geom world position
-    geom_centre = data.geom_xpos[geom_id].copy()
+    # Drop invisible geoms (rgba alpha == 0) so the bounding box reflects
+    # the *visible* object rather than hidden ballast spheres.
+    visible = [gid for gid in geom_ids if model.geom_rgba[gid, 3] > 0.0]
+    if visible:
+        geom_ids = visible
 
-    geom_type = model.geom_type[geom_id]
-    size      = model.geom_size[geom_id].copy()
+    # Axis-aligned bounding box across all (visible) geoms.
+    mins, maxs = [], []
+    for gid in geom_ids:
+        pos   = data.geom_xpos[gid]
+        size  = model.geom_size[gid]
+        gtype = model.geom_type[gid]
+        if   gtype == mujoco.mjtGeom.mjGEOM_BOX:
+            half = size.copy()
+        elif gtype == mujoco.mjtGeom.mjGEOM_CYLINDER:
+            half = np.array([size[0], size[0], size[1]])
+        elif gtype == mujoco.mjtGeom.mjGEOM_SPHERE:
+            half = np.array([size[0], size[0], size[0]])
+        elif gtype == mujoco.mjtGeom.mjGEOM_CAPSULE:
+            half = np.array([size[0], size[0], size[1] + size[0]])
+        else:
+            half = np.array([0.025, 0.025, 0.025])
+        mins.append(pos - half)
+        maxs.append(pos + half)
+    mins = np.min(np.stack(mins), axis=0)
+    maxs = np.max(np.stack(maxs), axis=0)
 
-    if geom_type == mujoco.mjtGeom.mjGEOM_BOX:
-        width, depth, height = size[0]*2, size[1]*2, size[2]*2
-    elif geom_type == mujoco.mjtGeom.mjGEOM_CYLINDER:
-        width = depth = size[0] * 2
-        height        = size[1] * 2
-    elif geom_type == mujoco.mjtGeom.mjGEOM_SPHERE:
-        width = depth = height = size[0] * 2
-    elif geom_type == mujoco.mjtGeom.mjGEOM_CAPSULE:
-        width = depth = size[0] * 2
-        height        = size[1]*2 + size[0]*2
-    else:
-        print(f"⚠️  Unknown geom type {geom_type}, defaulting to 5cm")
-        width = depth = height = 0.05
+    width       = float(maxs[0] - mins[0])
+    depth       = float(maxs[1] - mins[1])
+    height      = float(maxs[2] - mins[2])
+    geom_centre = (mins + maxs) / 2.0
+
+    # Pick the representative geom for outline drawing — largest visible geom,
+    # so the dashed XY outline (circle vs rectangle) makes sense.
+    primary   = max(geom_ids, key=lambda g: float(np.prod(model.geom_size[g])))
+    geom_type = model.geom_type[primary]
 
     return ObjGeom(
-        com=com,
-        geom_centre=geom_centre,
-        height=height, width=width, depth=depth,
-        geom_type=geom_type,
-        table_z=geom_centre[2] - height / 2.0,
-        top_z  =geom_centre[2] + height / 2.0,
+        com         = com,
+        geom_centre = geom_centre,
+        height      = height,
+        width       = width,
+        depth       = depth,
+        geom_type   = geom_type,
+        table_z     = geom_centre[2] - height / 2.0,
+        top_z       = geom_centre[2] + height / 2.0,
     )
 
 
@@ -1079,9 +1090,6 @@ def run_heatmap_analysis(xml_path: str,
     model = mujoco.MjModel.from_xml_path(xml_path)
     data  = mujoco.MjData(model)
     mujoco.mj_forward(model, data)
-    for _ in range(300):
-        mujoco.mj_step(model, data)
-
     hm = AffordanceHeatmap(model, data, obj_name)
     hm.compute(n_top_radial=10, n_top_angular=16,
                n_side_height=10, n_side_angular=32)
@@ -1103,7 +1111,8 @@ def main():
         ("scene_grasp_clean.xml",    "cube"),
         ("scene_grasp_cylinder.xml", "cube"),
         ("scene_grasp_tallbox.xml",  "cube"),
-        ("scene_shifted_com.xml",    "cube"),   # ← new
+        ("scene_shifted_com.xml",    "cube"),
+        ("scene_bottle.xml",         "cube"),
     ]
 
     for scene_file, obj_name in scenes:
