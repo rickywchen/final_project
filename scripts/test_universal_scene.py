@@ -18,7 +18,7 @@ def test_scene_loading():
     print("="*70)
     
     if not XML_PATH.exists():
-        print(f"❌ ERROR: Scene XML not found at {XML_PATH}")
+        print(f"ERROR: Scene XML not found at {XML_PATH}")
         return False
     
     try:
@@ -30,7 +30,7 @@ def test_scene_loading():
         print(f"  - DOFs: {model.nv}")
         return model, data
     except Exception as e:
-        print(f"❌ ERROR loading scene: {e}")
+        print(f"ERROR loading scene: {e}")
         return None, None
 
 
@@ -51,7 +51,7 @@ def test_object_detection(model, data):
         
         return True
     except Exception as e:
-        print(f"❌ ERROR: Could not find target object: {e}")
+        print(f"ERROR: Could not find target object: {e}")
         return False
 
 
@@ -87,7 +87,7 @@ def test_physics_settling(model, data):
         print(f"  - Object Z: {final_pos[2]:.4f}m")
         return True
     else:
-        print(f"❌ WARNING: Object not on table (Z={final_pos[2]:.4f}m)")
+        print(f"WARNING: Object not on table (Z={final_pos[2]:.4f}m)")
         return False
 
 
@@ -124,7 +124,7 @@ def test_with_viewer(model, data):
         print("✓ Viewer test complete")
         return True
     except Exception as e:
-        print(f"❌ Viewer error: {e}")
+        print(f"Viewer error: {e}")
         print("  (This is OK on some systems - continue with headless tests)")
         return False
 
@@ -138,17 +138,17 @@ def run_all_tests():
     # Test 1: Loading
     model, data = test_scene_loading()
     if model is None:
-        print("\n❌ CRITICAL ERROR: Scene failed to load. Fix XML before continuing.")
+        print("\nCRITICAL ERROR: Scene failed to load. Fix XML before continuing.")
         return False
     
     # Test 2: Object detection
     if not test_object_detection(model, data):
-        print("\n❌ CRITICAL ERROR: Object not found in scene.")
+        print("\nCRITICAL ERROR: Object not found in scene.")
         return False
     
     # Test 3: Physics
     if not test_physics_settling(model, data):
-        print("\n⚠ WARNING: Physics settling may have issues, but continuing...")
+        print("\nWARNING: Physics settling may have issues, but continuing...")
     
     # Test 4: Viewer (optional)
     test_with_viewer(model, data)
@@ -160,7 +160,7 @@ def run_all_tests():
     print("✓ Scene loads correctly")
     print("✓ Object is present")
     print("✓ Basic physics works")
-    print("\n✅ Ready to proceed to object_loader.py testing!")
+    print("\nReady to proceed to object_loader.py testing!")
     print("="*70 + "\n")
     
     return True
@@ -170,8 +170,8 @@ if __name__ == "__main__":
     success = run_all_tests()
     
     if not success:
-        print("\n⚠ Fix errors above before proceeding to next component.")
+        print("\nFix errors above before proceeding to next component.")
         exit(1)
     else:
-        print("✅ All tests passed! Scene is ready.")
+        print("All tests passed! Scene is ready.")
         exit(0)

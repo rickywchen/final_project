@@ -476,7 +476,7 @@ def run_comparison(xml_path: str, obj_name: str = "cube",
         print(f"  Angles: {[f'{a:.0f}°' for a in angle_degs[:12]]}"
               + (f" ... +{len(angle_degs)-12} more" if len(angle_degs) > 12 else ""))
     else:
-        print(f"  ⚠ NO reachable side grasp angles! Cannot run comparison.")
+        print(f"  NO reachable side grasp angles! Cannot run comparison.")
         return None
 
     # CoM info
@@ -744,7 +744,7 @@ def main():
     for scene_file, obj_name, z, n in scenes:
         xml = SCENES_DIR / scene_file
         if not xml.exists():
-            print(f"⚠️  Not found: {xml}")
+            print(f"Not found: {xml}")
             continue
         run_comparison(
             xml_path   = str(xml),

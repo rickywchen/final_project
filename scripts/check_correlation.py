@@ -44,7 +44,7 @@ for scene in scenes:
     ]
     path = next((p for p in candidates if p.exists()), None)
     if path is None:
-        print(f"  ⚠  No JSON for {scene}")
+        print(f"  No JSON for {scene}")
         continue
 
     trials = load_trials(path)
