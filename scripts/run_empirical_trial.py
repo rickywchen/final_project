@@ -1,18 +1,11 @@
 """
-Run Empirical Grasp Trials — v1
-Franka Panda + MuJoCo 3.x
-
-Main entry point for the empirical affordance mapping pipeline:
+Main entry point for the empirical affordance mapping pipeline.
 
   1. Load scene (bottle or shifted-CoM cylinder)
   2. Sample N contact points across the object surface
   3. Execute each grasp physically in MuJoCo
   4. Record lift distance + success/failure at every contact point
   5. Build and save empirical affordance heatmap from real results
-
-This produces a PHYSICS-GROUNDED affordance map — the colour at each
-surface point reflects what ACTUALLY happened when the robot grasped there,
-not a formula.
 
 Usage:
     python scripts/run_empirical_trial.py

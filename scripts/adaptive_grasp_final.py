@@ -1,18 +1,8 @@
 """
-Adaptive Multi-Object Grasping System — v13
-Franka Panda + MuJoCo 3.x
+Adaptive multi-object grasping for Franka Panda in MuJoCo.
 
-v13 changes vs v12:
-  - execute_grasp() accepts obj_name parameter (no more hardcoded "cube")
-  - generate_grasp_candidates() samples DIVERSE angles from full heatmap
-    (not just π/2 and mirror) — essential for meaningful affordance maps
-  - New run_affordance_trial_loop(): runs all sampled candidates, records
-    every outcome → feeds EmpiricalHeatmap for data-driven affordance maps
-  - Bottle scene (scene_bottle.xml) added to main()
-  - plan_side_grasp() now accepts explicit grasp_z override so heatmap
-    contact heights are respected (not always CoM z)
-  - Reachability guard moved into plan_side_grasp() return value check
-    (was silently ignoring bad angles)
+Generates grasp candidates from an affordance heatmap, executes them
+physically, and records outcomes for empirical analysis.
 """
 
 import numpy as np
@@ -90,10 +80,8 @@ class ObjectGeometry:
 @dataclass
 class GraspCandidate:
     """
-    One sampled grasp: a contact position on the object surface +
-    approach angle + predicted quality from the heatmap.
-    Replaces the old GraspPlan dataclass — now explicitly tied to a
-    surface contact point so outcomes can be logged to the heatmap.
+    One sampled grasp: a contact position on the object surface,
+    approach angle, and predicted quality from the heatmap.
     """
     strategy:        str
     quality:         float           # heatmap predicted quality (0–1)
@@ -370,7 +358,7 @@ def generate_grasp_candidates(obj:       ObjectGeometry,
                                n_top:     int  = 12,
                                n_side:    int  = 16) -> List[GraspCandidate]:
     """
-    Generate a DIVERSE set of grasp candidates.
+    Generate a set of grasp candidates spread across the object surface.
 
     When use_map=True (affordance-guided):
       - Top-down: sample n_top points across the object top surface,
@@ -385,9 +373,8 @@ def generate_grasp_candidates(obj:       ObjectGeometry,
       - Side: only π/2 and −π/2 (standard fixed angles).
       This is Scenario 1 — naive planner that ignores CoM.
 
-    Key insight: diversity of candidates is ESSENTIAL for a meaningful
-    affordance map. If we always pick the same best contact, the map
-    shows one green dot and nothing else.
+    A spread of contact points is needed so the resulting affordance
+    map covers more than a single optimum.
     """
     candidates: List[GraspCandidate] = []
 
@@ -467,9 +454,8 @@ def generate_grasp_candidates(obj:       ObjectGeometry,
             candidates.append(c)
 
     # ── SIDE: sample uniformly across full 360° at multiple heights ───────────
-    # This is the KEY change from v12: instead of only π/2 and mirror,
-    # we sample ALL angles. Some will succeed, some fail.
-    # The pattern of success/failure across angles IS the affordance map.
+    # Sampling all angles (not just π/2 and mirror) means some will succeed
+    # and some will fail; that pattern of outcomes populates the affordance map.
 
     if obj.is_tall() and obj.is_graspable_laterally():
         z_min = obj.table_z + 0.01
@@ -754,17 +740,10 @@ def run_affordance_trial_loop(xml_path:     str,
     Core affordance data collection loop.
 
     1. Load scene, compute heatmap
-    2. Generate DIVERSE candidates across full object surface
+    2. Generate candidates spread across the full object surface
     3. Execute each candidate physically (up to max_trials)
     4. Record outcome (lift distance, success/fail) per contact point
     5. Save JSON → feed to EmpiricalHeatmap for visualisation
-
-    The diversity of contact points + outcomes IS the affordance map.
-    Running this on the bottle will produce a map showing:
-      - Base section (dark blue): high success
-      - Slippery band (orange):   low success / slips
-      - Neck (bright blue):       fails due to tipping (CoM far below)
-      - Near-CoM (+Y side):       higher success than -Y side
     """
     if obj_pos is None:
         obj_pos = DEFAULT_OBJ.copy()

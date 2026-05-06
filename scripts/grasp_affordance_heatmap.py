@@ -1,13 +1,8 @@
 """
-Grasp Affordance Heatmap — v5
-Franka Panda + MuJoCo 3.x
+Analytical grasp affordance heatmap for Franka Panda in MuJoCo.
 
-Changes in v5:
-  9.  plot_mesh()       — coloured surface mesh painted with quality scores
-  10. plot_comparison() — side-by-side naive vs affordance-guided comparison
-  11. best_contact()    — returns single best ContactSample across all types
-  12. naive_contact()   — returns contact closest to geometric centre (ignores CoM)
-  13. scene_shifted_com added to main()
+Samples contact points across an object's surface, scores each by
+reachability, force closure, and clearance, and renders 2D/3D heatmaps.
 """
 
 import numpy as np

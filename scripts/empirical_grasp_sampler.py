@@ -1,28 +1,8 @@
 """
-Empirical Grasp Sampler — v4
-Franka Panda + MuJoCo 3.x
+Empirical grasp sampler for Franka Panda in MuJoCo.
 
 Samples contact points across an object's surface and executes each as a
-physical grasp trial in MuJoCo, recording the measured lift distance.
-
-v4 fixes vs v3:
-  - Side grasp approach trajectory completely reworked: arm now descends
-    at the standoff point (far from object) then slides horizontally inward.
-    Eliminates forearm-table collisions that caused -4.6cm / -44cm readings.
-  - _side_reachable() now takes table_z and rejects contacts where the
-    hand would be less than 12cm above the table surface.
-  - OSC velocity clamping (V_MAX_LIN = 0.30 m/s) prevents overshoot.
-  - mj_jacBody used instead of mj_jacBodyCom for correct frame Jacobian.
-  - kp_pos raised to 3.5 for faster convergence at small errors.
-  - pos_tol for final grasp tightened to 0.018 with more steps (2000).
-
-v3 fixes (retained):
-  - Top-down reachability check BEFORE attempting trial
-  - Side reachability check tightened (approach_xy limit enforced)
-  - TrialResult dataclass exported for use by EmpiricalHeatmap
-  - get_object_info() exported for use by run_empirical_trial.py
-  - ObjInfo now includes body_name field (fixes title showing array)
-  - get_object_info() uses body_name parameter correctly
+physical grasp trial, recording the measured lift distance.
 """
 
 import numpy as np
@@ -126,7 +106,7 @@ def _side_reachable(contact_pos: np.ndarray,
     The approach point (standoff from surface) must be within workspace.
     Also rejects contacts too close to the table for the Panda's geometry.
     """
-    # ── v4 FIX: reject contacts too close to the table ───────────────────
+    # ── Reject contacts too close to the table ────────────────────────────────
     # The Panda forearm + hand body extends ~12cm below the wrist.
     # For a horizontal side grasp, the hand must be at least 12cm above
     # the table or the forearm/elbow will scrape/collide.
@@ -343,7 +323,7 @@ def reset_scene(model: mujoco.MjModel,
 class _OSController:
     """
     Operational Space Controller (Jacobian-based).
-    v4: uses mj_jacBody (frame Jacobian), velocity clamping, higher Kp.
+    Uses mj_jacBody (frame Jacobian), velocity clamping, and higher Kp.
     """
     def __init__(self, model, data, ee_body="hand",
                  kp_pos=3.5, kp_ori=1.5, damping=0.01, null_kp=0.3):
@@ -394,7 +374,7 @@ class _OSController:
             mujoco.mj_jacBodyCom(self.model, self.data, Jp, Jr, self.ee_id)
             J = np.vstack([Jp[:, :self.nj], Jr[:, :self.nj]])
 
-            # v4 FIX: velocity clamping to prevent aggressive overshoot
+            # Clamp linear velocity to prevent overshoot.
             v_lin = self.kp_pos * pos_err
             v_lin_norm = np.linalg.norm(v_lin)
             if v_lin_norm > V_MAX_LIN:
@@ -464,8 +444,8 @@ def _execute_trial(model, data, osc, obj: ObjInfo,
     Execute one physical grasp trial.
     Returns (lift_m, fail_reason).  fail_reason="" on success.
 
-    v4: side grasp trajectory reworked — descend at standoff (far from
-    object), then slide horizontally inward. Eliminates table collisions.
+    Side grasp trajectory: descend at standoff (far from object), then
+    slide horizontally inward to avoid table collisions.
     """
     body_id   = mujoco.mj_name2id(model, mujoco.mjtObj.mjOBJ_BODY, obj.body_name)
     initial_z = data.xpos[body_id][2]
@@ -598,7 +578,6 @@ def run_trials(xml_path:       str,
                         success=False, fail_reason="unreachable"))
                     continue
             else:  # side
-                # v4: pass table_z to enable minimum-Z filtering
                 if not _side_reachable(pos, angle, obj.radius_xy(), obj.table_z):
                     results.append(TrialResult(
                         trial_id=trial_id, contact_pos=pos,
