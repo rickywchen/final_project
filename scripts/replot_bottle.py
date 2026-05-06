@@ -17,11 +17,7 @@ ROOT       = Path(__file__).resolve().parent.parent
 SCENES_DIR = ROOT / "assets" / "scenes"
 OUTPUT_DIR = ROOT / "outputs" / "empirical"
 
-# FIX: JSON is saved by the sampler into assets/outputs/empirical/,
-# but replot reads from outputs/empirical/ — align them to the same place.
-# The sampler saves to: <xml_path parent>/../outputs/empirical/
-# xml_path = assets/scenes/scene_bottle.xml → saves to assets/outputs/empirical/
-# So we must look there:
+# Trial JSON is written to assets/outputs/empirical/ by the sampler.
 JSON_PATH  = ROOT / "assets" / "outputs" / "empirical" / "empirical_trials_scene_bottle.json"
 
 # Fallback: also check the root outputs dir (in case user moved it)
@@ -67,7 +63,7 @@ obj = ObjInfo(
     geom_type       = raw.geom_type,
     table_z         = raw.table_z,
     top_z           = raw.top_z,
-    bottle_sections = bottle_sections,  # FIX: pass sections for tapered mesh
+    bottle_sections = bottle_sections,
 )
 
 print(f"Loading trial data from: {JSON_PATH}")

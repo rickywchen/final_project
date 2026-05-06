@@ -1,14 +1,8 @@
 """
-Empirical Grasp Affordance Heatmap — v4 (final)
-Franka Panda + MuJoCo 3.x
+Empirical affordance heatmap for Franka Panda grasp trials in MuJoCo.
 
-v4 fixes vs v3:
-  - plot_mesh(): mesh now tapers like the real bottle (uses per-height radius
-    from bottle_sections geometry, not a single max radius cylinder)
-  - plot_2d():   slippery band uses hard-coded XML Z range (0.478–0.522)
-    instead of data-driven range that spanned the whole bottle height
-  - ObjInfo:     optional bottle_sections field for tapered mesh
-  - Grey zones:  unchanged from v3 (no-data zones stay grey)
+Loads trial results (lift distances) and renders 2D, 3D, and surface-mesh
+heatmap visualisations coloured by empirical grasp success.
 """
 
 import numpy as np
@@ -496,9 +490,8 @@ class EmpiricalHeatmap:
         """
         Colour the object surface mesh by empirical lift score.
 
-        v4: mesh now tapers to match the actual bottle profile (base=3cm,
-        shoulder=2.2cm, neck=1.5cm) using bottle_sections geometry.
-        Grey zones = no trial data nearby (v3 fix, retained).
+        Mesh tapers to match the actual bottle profile using bottle_sections
+        geometry. Grey zones indicate no trial data nearby.
         """
         if save_path is None:
             save_path = "empirical_heatmap_mesh.png"

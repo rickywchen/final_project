@@ -3,14 +3,14 @@ Sub-task 4: Affordance-Guided Grasp Selection Criteria
 ======================================================
 Compares Naive (geometric centre) vs Affordance-guided (CoM-aware) grasping.
 
-Key insight: the Panda has a LIMITED reachable workspace for side grasps.
-Not all angles are physically possible. The affordance-guided planner
-respects this — it pre-filters for reachability, then biases toward
-the CoM side among reachable angles. The naive planner picks uniformly.
+The Panda has a limited reachable workspace for side grasps; not all
+approach angles are physically possible. The affordance-guided planner
+pre-filters for reachability, then biases toward the CoM side among
+reachable angles. The naive planner picks uniformly.
 
 This script:
   1. Loads a scene, reads true CoM via data.subtree_com
-  2. Computes the REACHABLE angle set (pre-filter like empirical_grasp_sampler)
+  2. Computes the reachable angle set (pre-filter like empirical_grasp_sampler)
   3. Scenario 1 (NAIVE): grasp at uniformly sampled reachable angles
   4. Scenario 2 (MAP):   grasp at CoM-biased reachable angles + optimal height
   5. Saves comparison plots + JSON results
