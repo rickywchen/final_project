@@ -431,7 +431,7 @@ class AffordanceHeatmap:
         print(f"  Real CoM:          [{self.obj.com[0]:.3f}, "
               f"{self.obj.com[1]:.3f}, {self.obj.com[2]:.3f}]")
         print(f"  CoM offset (XY):   {com_off*100:.1f} cm  "
-              f"{'⚠️  SHIFTED' if com_off > 0.005 else '(symmetric)'}")
+              f"{'SHIFTED' if com_off > 0.005 else '(symmetric)'}")
         print(f"  Top-down feasible: {n_top}")
         print(f"  Side feasible:     {n_side}")
         print(f"  Not feasible:      {n_nf}")
@@ -1118,7 +1118,7 @@ def main():
     for scene_file, obj_name in scenes:
         xml = SCENES_DIR / scene_file
         if not xml.exists():
-            print(f"⚠️  Not found: {xml}")
+            print(f"Not found: {xml}")
             continue
         run_heatmap_analysis(str(xml), obj_name, str(OUTPUT_DIR))
 

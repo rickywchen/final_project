@@ -219,7 +219,7 @@ def analyze_object(model: mujoco.MjModel,
             width = depth = size_raw[0]*2
             height = size_raw[1]*2 + size_raw[0]*2
         else:
-            print(f"⚠️  Unknown geom type {geom_type}, defaulting to 5cm")
+            print(f"Unknown geom type {geom_type}, defaulting to 5cm")
             width = depth = height = 0.05
         table_z = geom_centre[2] - height / 2.0
         top_z   = geom_centre[2] + height / 2.0
@@ -796,7 +796,7 @@ def run_affordance_trial_loop(xml_path:     str,
                             n_side_height=8, n_side_angular=24)
             print("  Analytical heatmap computed for candidate scoring.")
         except ImportError:
-            print("  ⚠️  grasp_affordance_heatmap not found — using uniform quality.")
+            print("  grasp_affordance_heatmap not found — using uniform quality.")
 
     candidates = generate_grasp_candidates(
         obj, SAFE_HOME, heatmap=heatmap,
@@ -975,15 +975,15 @@ def run_shifted_com_comparison(xml_path:   str,
         time.sleep(1.5)
 
         # ── Summary ───────────────────────────────────────────────────────────
-        print(f"\n  {'═'*50}")
+        print(f"\n  {'='*50}")
         print(f"  COMPARISON SUMMARY")
-        print(f"  {'═'*50}")
+        print(f"  {'='*50}")
         print(f"  Naive → lift={naive_lift*100:.1f}cm  {'✓' if naive_ok else '✗ FAIL'}")
         print(f"  Map   → lift={map_lift*100:.1f}cm  {'✓' if map_ok else '✗ FAIL'}")
         delta = map_lift - naive_lift
         print(f"  Improvement: {delta*100:+.1f} cm  "
               f"({'map wins' if delta > 0 else 'naive similar or better'})")
-        print(f"  {'═'*50}")
+        print(f"  {'='*50}")
 
         # ── Save plots ────────────────────────────────────────────────────────
         out = Path(output_dir)
@@ -1024,7 +1024,7 @@ def main():
     for scene_file, obj_name, obj_z, n_trials in trial_scenes:
         xml = SCENES_DIR / scene_file
         if not xml.exists():
-            print(f"⚠️  Not found: {xml}")
+            print(f"Not found: {xml}")
             continue
 
         print(f"\n\n{'#'*60}\n  SCENE: {scene_file}\n{'#'*60}")
@@ -1051,7 +1051,7 @@ def main():
             output_dir = str(OUTPUT_DIR / "heatmaps"),
         )
     else:
-        print(f"⚠️  Not found: {shifted_xml}")
+        print(f"Not found: {shifted_xml}")
 
     # ── Overall summary ───────────────────────────────────────────────────────
     print(f"\n\n{'='*60}\n  OVERALL RESULTS\n{'='*60}")
